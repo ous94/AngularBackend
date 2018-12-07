@@ -84,7 +84,7 @@ public class CustomerController {
 	@Autowired
 	CustomerRepository repository;
 	
-	@GetMapping("/hi")
+	@GetMapping("/api")
  public String hi()
  {
 	 return "bienvenue Demarage en cour ...";
@@ -98,6 +98,12 @@ public class CustomerController {
 		repository.findAll().forEach(customers::add);
  
 		return customers;
+	}
+	
+	@GetMapping(value = "customers/{id}")
+	public Optional<Customer> findByid(@PathVariable Long id) {
+ 
+		return repository.findById(id);
 	}
  
 	@PostMapping(value = "/customers/create")
@@ -115,6 +121,8 @@ public class CustomerController {
  
 		return new ResponseEntity<>("Customer has been deleted!", HttpStatus.OK);
 	}
+	
+	
  
 	@DeleteMapping("/customers/delete")
 	public ResponseEntity<String> deleteAllCustomers() {
