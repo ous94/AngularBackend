@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.loader.custom.Return;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,7 +77,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.base.Model.Customer;
 import com.base.Repository.CustomerRepository;
  
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200",allowedHeaders="*")
 @RestController
 @RequestMapping("/api")
 public class CustomerController {
@@ -102,14 +103,17 @@ public class CustomerController {
 	
 	@GetMapping(value = "customers/{id}")
 	public Optional<Customer> findByid(@PathVariable Long id) {
+		System.out.println("Get one Customer...");
  
 		return repository.findById(id);
 	}
  
 	@PostMapping(value = "/customers/create")
 	public Customer postCustomer(@RequestBody Customer customer) {
+		System.out.println("Ajout d'un Customers...");
  
-		Customer _customer = repository.save(new Customer(customer.getName(), customer.getAge()));
+		Customer _customer = 
+				repository.save(new Customer(customer.getId(),customer.getName(), customer.getAge(),customer.isActive()));
 		return _customer;
 	}
  
@@ -135,6 +139,8 @@ public class CustomerController {
  
 	@GetMapping(value = "customers/age/{age}")
 	public List<Customer> findByAge(@PathVariable int age) {
+		System.out.println("recherche Customer de l'age"+age);
+
  
 		List<Customer> customers = repository.findByAge(age);
 		return customers;
@@ -146,14 +152,40 @@ public class CustomerController {
  
 		Optional<Customer> customerData = repository.findById(id);
  
-		if (customerData.isPresent()) {
-			Customer _customer = customerData.get();
+		    Customer _customer = customerData.get();
+			_customer.setId(customer.getId());
 			_customer.setName(customer.getName());
 			_customer.setAge(customer.getAge());
 			_customer.setActive(customer.isActive());
+			
 			return new ResponseEntity<>(repository.save(_customer), HttpStatus.OK);
+		
+	}
+	//la methode ajouter
+	@PutMapping("/custumeredit")
+	public List<Customer> updatemaCustomer( @RequestBody Customer customer) throws Exception {
+		System.out.println("Update Customer with ID = " + customer.getId() + "...");
+ 
+		Optional<Customer> customerData = repository.findById(customer.getId());
+           
+		    /*Customer _customer = customerData.get();
+			_customer.setId(customer.getId());
+			_customer.setName(customer.getName());
+			_customer.setAge(customer.getAge());
+			_customer.setActive(customer.isActive());
+			return new ResponseEntity<>(repository.save(_customer), HttpStatus.OK);*/
+		if (customerData.isPresent()) {
+			Customer _customer = customerData.get();
+			_customer.setId(customer.getId());
+			_customer.setName(customer.getName());
+			_customer.setAge(customer.getAge());
+			_customer.setActive(customer.isActive());
+			repository.save(_customer);
+			
+			return getAllCustomers();
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return null;
 		}
+		
 	}
 }
